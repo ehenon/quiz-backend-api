@@ -1,7 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { InstrumentsModule } from './instruments/instruments.module';
+import { QuestionsModule } from './questions/questions.module';
 import { HealthModule } from './health/health.module';
 import { HttpLoggerMiddleware } from './logger/http-logger.middleware';
 
@@ -15,7 +15,7 @@ import { HttpLoggerMiddleware } from './logger/http-logger.middleware';
       }),
       inject: [ConfigService],
     }),
-    InstrumentsModule,
+    QuestionsModule,
     HealthModule,
   ],
 })

@@ -14,7 +14,7 @@ async function bootstrap() {
 
   // Creating a Swagger spec document
   const config = new DocumentBuilder()
-    .setTitle('Instruments API OpenAPI specification')
+    .setTitle('Questions API OpenAPI specification')
     .setDescription('API used to [...]')
     .setVersion('0.0.0')
     .build();

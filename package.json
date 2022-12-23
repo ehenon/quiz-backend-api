@@ -1,7 +1,7 @@
 {
-  "name": "nestjs-mongodb-api-boilerplate",
+  "name": "quiz-backend-api",
   "version": "0.0.0",
-  "description": "NestJS + MongoDB API boilerplate",
+  "description": "Quiz Backend API in NestJS",
   "author": "ehenon",
   "license": "MIT",
   "scripts": {
