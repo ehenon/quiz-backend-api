@@ -1,0 +1,16 @@
+services:
+  api:
+    image: quiz-backend
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only will build development stage from our dockerfile
+      target: development # points to the development stage within the Dockerfile
+    volumes: # enables data to be persisted and makes the hot reloading possible
+      - .:/usr/src/app
+    env_file: # tells Docker to load the .env file into the container
+    - .env
+    # Run a command against the development stage of the image
+    command: npm run start:dev # tells Docker to run this command against the image built in the development stage
+    ports:
+      - 3000:3000
