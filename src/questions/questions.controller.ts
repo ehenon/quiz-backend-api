@@ -6,11 +6,13 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -33,6 +35,15 @@ export class QuestionsController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async create(@Body() createQuestionDTO: CreateQuestionDTO): Promise<QuestionDocument> {
     return this.questionsService.create(createQuestionDTO);
+  }
+
+  @Get('random')
+  @ApiOperation({ summary: 'Get a number of random questions (min. 1, default 15, max. 50)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Questions successfully returned', type: QuestionSwaggerModel })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async findRandomDocuments(@Query('limit') limit = 15): Promise<QuestionDocument[]> {
+    return this.questionsService.findRandomDocuments(limit);
   }
 
   @Get(':identifier')

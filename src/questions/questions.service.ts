@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { v1 as uuidv1 } from 'uuid';
+import random from 'lodash.random';
 import { CreateQuestionDTO } from './dto/create-question.dto';
 import { UpdateQuestionDTO } from './dto/update-question.dto';
 import { QuestionDocument } from './schemas/question.schema';
@@ -16,6 +17,15 @@ export class QuestionsService {
     const newQuestion = new this.QuestionModel(createQuestionDTO);
     newQuestion.identifier = uuidv1();
     return newQuestion.save();
+  }
+
+  async findRandomDocuments(limit: number): Promise<QuestionDocument[]> {
+    if (limit > 50 || limit < 0) {
+      throw new BadRequestException('The "limit" parameter must be between 0 and 50');
+    }
+    const count = await this.QuestionModel.countDocuments();
+    const skip = random(0, count - limit);
+    return this.QuestionModel.find().skip(skip).limit(limit).exec();
   }
 
   async findOne(identifier: string): Promise<QuestionDocument> {

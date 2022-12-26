@@ -59,6 +59,46 @@ describe('QuestionsController', () => {
     });
   });
 
+  describe('findRandomDocuments()', () => {
+    const MOCK_RESPONSE_FROM_SERVICE = [
+      createQuestionDocumentStub(),
+      createQuestionDocumentStub(),
+    ];
+
+    test('OK: the random questions are returned (default limit)', async () => {
+      jest
+        .spyOn(questionsService, 'findRandomDocuments')
+        .mockImplementation(async () => MOCK_RESPONSE_FROM_SERVICE);
+      expect(
+        await questionsController.findRandomDocuments(),
+      ).toEqual(MOCK_RESPONSE_FROM_SERVICE);
+      expect(questionsService.findRandomDocuments).toHaveBeenCalledTimes(1);
+      expect(questionsService.findRandomDocuments).toHaveBeenCalledWith(15);
+    });
+
+    test('OK: the random questions are returned (custom limit)', async () => {
+      jest
+        .spyOn(questionsService, 'findRandomDocuments')
+        .mockImplementation(async () => MOCK_RESPONSE_FROM_SERVICE);
+      expect(
+        await questionsController.findRandomDocuments(30),
+      ).toEqual(MOCK_RESPONSE_FROM_SERVICE);
+      expect(questionsService.findRandomDocuments).toHaveBeenCalledTimes(1);
+      expect(questionsService.findRandomDocuments).toHaveBeenCalledWith(30);
+    });
+
+    test('KO: the promise is rejected', async () => {
+      jest
+        .spyOn(questionsService, 'findRandomDocuments')
+        .mockImplementation(async () => { throw MOCK_ERROR; });
+      await expect(
+        questionsController.findRandomDocuments(),
+      ).rejects.toEqual(MOCK_ERROR);
+      expect(questionsService.findRandomDocuments).toHaveBeenCalledTimes(1);
+      expect(questionsService.findRandomDocuments).toHaveBeenCalledWith(15);
+    });
+  });
+
   describe('findOne()', () => {
     const MOCK_RESPONSE_FROM_SERVICE = createQuestionDocumentStub();
     const MOCK_IDENTIFIER = '1';

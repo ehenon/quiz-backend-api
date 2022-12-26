@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { v1 as uuidv1 } from 'uuid';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
 import { createQuestionDTOStub } from './dto/stubs/create-question-dto.stub';
 import { updateQuestionDTOStub } from './dto/stubs/update-question-dto.stub';
@@ -23,7 +23,16 @@ describe('QuestionsService', () => {
   class MockModelClass {
     constructor(args) { Object.assign(this, { ...args }); }
     save() { return this; }
-    static find() { return { exec: jest.fn().mockResolvedValue([MOCK_QUESTION_DOCUMENT]) }; }
+    static async countDocuments() { return 50; }
+    static find() {
+      return {
+        skip: jest.fn().mockReturnValue({
+          limit: jest.fn().mockReturnValue({
+            exec: jest.fn().mockResolvedValue([MOCK_QUESTION_DOCUMENT, MOCK_QUESTION_DOCUMENT]),
+          }),
+        }),
+      };
+    }
     static findOne() { return { exec: jest.fn().mockResolvedValue(MOCK_QUESTION_DOCUMENT) }; }
     static findOneAndUpdate() {
       return { exec: jest.fn().mockResolvedValue(MOCK_QUESTION_DOCUMENT) };
@@ -36,7 +45,16 @@ describe('QuestionsService', () => {
   class MockModelClassWrong {
     constructor(args) { Object.assign(this, { ...args }); }
     save() { return Promise.reject(MOCK_ERROR); }
-    static find() { return { exec: jest.fn().mockRejectedValue(MOCK_ERROR) }; }
+    static async countDocuments() { return 50; }
+    static find() {
+      return {
+        skip: jest.fn().mockReturnValue({
+          limit: jest.fn().mockReturnValue({
+            exec: jest.fn().mockRejectedValue(MOCK_ERROR),
+          }),
+        }),
+      };
+    }
     static findOne() { return { exec: jest.fn().mockRejectedValue(MOCK_ERROR) }; }
     static findOneAndUpdate() { return { exec: jest.fn().mockRejectedValue(MOCK_ERROR) }; }
     static findOneAndRemove() { return { exec: jest.fn().mockRejectedValue(MOCK_ERROR) }; }
@@ -84,6 +102,30 @@ describe('QuestionsService', () => {
           MOCK_CREATE_QUESTION_DTO,
         ),
       ).rejects.toEqual(MOCK_ERROR);
+    });
+  });
+
+  describe('findRandomDocuments()', () => {
+    test('OK: The random Questions are found and returned', async () => {
+      await expect(
+        goodQuestionsService.findRandomDocuments(15),
+      ).resolves.toEqual([MOCK_QUESTION_DOCUMENT, MOCK_QUESTION_DOCUMENT]);
+    });
+
+    test('KO: Error executing the query', async () => {
+      await expect(
+        wrongQuestionsService.findRandomDocuments(15),
+      ).rejects.toEqual(MOCK_ERROR);
+    });
+
+    test('KO: The limit parameter is not valid', async () => {
+      const expectedError = new BadRequestException('The "limit" parameter must be between 0 and 50');
+      await expect(
+        goodQuestionsService.findRandomDocuments(-1),
+      ).rejects.toEqual(expectedError);
+      await expect(
+        goodQuestionsService.findRandomDocuments(51),
+      ).rejects.toEqual(expectedError);
     });
   });
 
