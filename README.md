@@ -1,8 +1,29 @@
 # Quiz Backend API
 
-TODO
+## Setup ⚙️
 
-## Docker
+```
+$ git clone https://github.com/ehenon/quiz-backend-api.git
+$ cd quiz-backend-api
+$ npm i
+$ cp .env.sample .env
+```
+
+Fill environment variables in `.env` file.
+
+## Available commands 🔥
+
+```
+$ npm run lint
+$ npm run test
+$ npm run start:dev
+$ npm run start:debug
+$ npm run start
+$ npm run build
+$ npm run start:prod
+```
+
+## Run via Docker 🐋
 
 Launch via Docker Compose:
 
