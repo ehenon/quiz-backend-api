@@ -23,6 +23,7 @@ describe('QuestionsService', () => {
   class MockModelClass {
     constructor(args) { Object.assign(this, { ...args }); }
     save() { return this; }
+    static async insertMany() { return [MOCK_QUESTION_DOCUMENT]; }
     static async countDocuments() { return 50; }
     static find() {
       return {
@@ -45,6 +46,7 @@ describe('QuestionsService', () => {
   class MockModelClassWrong {
     constructor(args) { Object.assign(this, { ...args }); }
     save() { return Promise.reject(MOCK_ERROR); }
+    static async insertMany() { throw MOCK_ERROR; }
     static async countDocuments() { return 50; }
     static find() {
       return {
@@ -105,26 +107,44 @@ describe('QuestionsService', () => {
     });
   });
 
-  describe('findRandomDocuments()', () => {
+  describe('createSeveral()', () => {
+    test('OK: The new Questions are created', async () => {
+      await expect(
+        goodQuestionsService.createSeveral(
+          [MOCK_CREATE_QUESTION_DTO],
+        ),
+      ).resolves.toEqual([MOCK_QUESTION_DOCUMENT]);
+    });
+
+    test('KO: The new Questions are not created', async () => {
+      await expect(
+        wrongQuestionsService.createSeveral(
+          [MOCK_CREATE_QUESTION_DTO],
+        ),
+      ).rejects.toEqual(MOCK_ERROR);
+    });
+  });
+
+  describe('findRandoms()', () => {
     test('OK: The random Questions are found and returned', async () => {
       await expect(
-        goodQuestionsService.findRandomDocuments(15),
+        goodQuestionsService.findRandoms(15),
       ).resolves.toEqual([MOCK_QUESTION_DOCUMENT, MOCK_QUESTION_DOCUMENT]);
     });
 
     test('KO: Error executing the query', async () => {
       await expect(
-        wrongQuestionsService.findRandomDocuments(15),
+        wrongQuestionsService.findRandoms(15),
       ).rejects.toEqual(MOCK_ERROR);
     });
 
     test('KO: The limit parameter is not valid', async () => {
       const expectedError = new BadRequestException('The "limit" parameter must be between 0 and 50');
       await expect(
-        goodQuestionsService.findRandomDocuments(-1),
+        goodQuestionsService.findRandoms(-1),
       ).rejects.toEqual(expectedError);
       await expect(
-        goodQuestionsService.findRandomDocuments(51),
+        goodQuestionsService.findRandoms(51),
       ).rejects.toEqual(expectedError);
     });
   });

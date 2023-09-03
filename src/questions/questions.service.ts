@@ -19,7 +19,16 @@ export class QuestionsService {
     return newQuestion.save();
   }
 
-  async findRandomDocuments(limit: number): Promise<QuestionDocument[]> {
+  async createSeveral(createSeveralQuestionsDTO: CreateQuestionDTO[]): Promise<QuestionDocument[]> {
+    const questionsToCreate = createSeveralQuestionsDTO.map((question) => ({
+      ...question,
+      identifier: uuidv1(),
+    }));
+
+    return this.QuestionModel.insertMany(questionsToCreate);
+  }
+
+  async findRandoms(limit: number): Promise<QuestionDocument[]> {
     if (limit > 50 || limit < 0) {
       throw new BadRequestException('The "limit" parameter must be between 0 and 50');
     }

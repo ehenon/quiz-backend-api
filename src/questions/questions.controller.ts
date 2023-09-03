@@ -9,8 +9,10 @@ import {
   Query,
   UsePipes,
   ValidationPipe,
+  ParseArrayPipe,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -37,13 +39,26 @@ export class QuestionsController {
     return this.questionsService.create(createQuestionDTO);
   }
 
+  @Post('several')
+  @ApiOperation({ summary: 'Create several new questions at once' })
+  @ApiBody({ type: [CreateQuestionDTO] })
+  @ApiResponse({ status: 201, description: 'Questions successfully created', type: [QuestionSwaggerModel] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async createSeveral(
+    @Body(new ParseArrayPipe({ items: CreateQuestionDTO }))
+      createSeveralQuestionsDTO: CreateQuestionDTO[],
+  ): Promise<QuestionDocument[]> {
+    return this.questionsService.createSeveral(createSeveralQuestionsDTO);
+  }
+
   @Get('random')
   @ApiOperation({ summary: 'Get a number of random questions (min. 1, default 15, max. 50)' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'Questions successfully returned', type: QuestionSwaggerModel })
+  @ApiResponse({ status: 200, description: 'Questions successfully returned', type: [QuestionSwaggerModel] })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async findRandomDocuments(@Query('limit') limit = 15): Promise<QuestionDocument[]> {
-    return this.questionsService.findRandomDocuments(limit);
+  async findRandoms(@Query('limit') limit = 15): Promise<QuestionDocument[]> {
+    return this.questionsService.findRandoms(limit);
   }
 
   @Get(':identifier')
